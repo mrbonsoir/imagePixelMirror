@@ -8,3 +8,5 @@ In general I can say this website (pyimagesearch)[http://www.pyimagesearch.com/]
 
 # What does is do?
 The code here will simply open a video stream from a webcam. Each frame will be replaced by a mosaic of small images. All the mosaic images are images previously recorded by the program.
+
+And maybe equally important is this website (lost in time)[http://pippin.gimp.org/lost_in_time/now_by_then.html] from which I got inspired.

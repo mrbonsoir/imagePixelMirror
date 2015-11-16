@@ -38,4 +38,4 @@ Let's say you want to create a mosaic of 8x8 cell having the same ratio of the o
 ## And after?
 When you press q it should stop. 
 
-When you start again with the same settings it should deleted the previous database if you choose the same name.
+When you start again with the same settings it should delete the previous database if you choose the same name.

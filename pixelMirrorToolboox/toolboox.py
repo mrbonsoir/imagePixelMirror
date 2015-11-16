@@ -5,6 +5,7 @@ import glob
 import toolboox
 import time
 import shutil
+import os
 
 # global parameters
 frame_wdth = 480
@@ -366,8 +367,9 @@ def fun_update_image_db(frame_video, path_to_image, list_db, metric_db, number_r
 	counter = int(list_db[-1][-7:-4])
 	new_name = "frame_"+image_search_pattern+"_"+str(counter+1).zfill(3)+".png"
 	list_db.append(new_name)
+	# remove the first image of the database
+	os.remove(path_to_image+list_db[0])
 	list_db.pop(0)
 	cv2.imwrite(path_to_image+list_db[-1],new_frame_resized_for_db)
-
 
 	return list_db, new_metric_db

@@ -4,8 +4,8 @@ Putting aside the facts that you have Python, the right modules and opencv 3 ins
 ## Getting some help
 Beforet to start a live session of the image pixel mirror you can check for info like this:
 
-'''
-imagePixelMirror jeremie$ python startPixelMirror.py -h
+```
+>python startPixelMirror.py -h
 We process the input arguments.
 usage: startPixelMirror.py [-h] [-dbs DATABASE_SIZE] -nr NUMBER_ROWS -dbp
                            DATABASE_PATH [-nf NUMBER_FRAMES]
@@ -26,14 +26,14 @@ optional arguments:
   -nfu NUMBER_FRAMES_FOR_UPDATE, --number_frames_for_update NUMBER_FRAMES_FOR_UPDATE
                         the program stops after 1000 frames or the specidied
                         amount given
-'''
+```
 
 ## Starting the bazard
 Let's say you want to create a mosaic of 8x8 cell having the same ratio of the orignal frame, update the database of images used as pixel mosaix of 128 images every 20 frames you will do:
 
-'''
-python startPixelMirror.py -dbs 128 -nr 8 -dbp frame_db -nfu 20
-'''
+```
+>python startPixelMirror.py -dbs 128 -nr 8 -dbp frame_db -nfu 20
+```
 
 ## And after?
 When you press q it should stop. 

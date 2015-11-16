@@ -43,19 +43,19 @@ else:
 number_rows = args["number_rows"]
 print "Number of cells will be row x row %1.0f x %1.0f." % (number_rows, number_rows)
 
-if not args.get("number_frames", False):
-	number_frames = 5000
-	print "The application will stop after %1.0f frames have been processed" % number_frames
-else:
-	number_frames = args["number_frames"]
-	print "The application will stop after %1.0f frames have been processed" % number_frames
+#if not args.get("number_frames", False):
+#	number_frames = 5000
+#	print "The application will stop after %1.0f frames have been processed" % number_frames
+#else:
+#	number_frames = args["number_frames"]
+#	print "The application will stop after %1.0f frames have been processed" % number_frames
 
 if not args.get("number_frames_for_update", False):
-	number_frames_for_update = 24
-	print "The application update the LUT every %1.0f frames" % number_frames_for_update
+	number_frame_update = 24
+	print "The application update the LUT every %1.0f frames" % number_frame_update
 else:
-	number_frames_for_update = args["number_frames_for_update"]
-	print "The application will stop after %1.0f frames have been processed" % number_frames_for_update
+	number_frame_update = args["number_frames_for_update"]
+	print "The application will stop after %1.0f frames have been processed" % number_frame_update
 
 
 # check if the path to the database is empty or not
@@ -97,15 +97,14 @@ list_image_name_db, metric_image_db = toolboox.fun_create_image_database2(path_t
 																		number_rows, 
 																		database_size)
 
-print list_image_name_db
+#print list_image_name_db
 #print metric_image_db
 
 print "database made of %1.0f images" % len(list_image_name_db)
 
 print "We start the bazard"
 counter_number_frames = 0
-number_frame_upate = 24
-counter_number_frame_upate = 0
+counter_number_frame_update = 0
 
 # keep looping until spinning!
 t0 = time.time()
@@ -135,12 +134,12 @@ while True:
 	cv2.imshow("Mirror", frame_mosaic)
 	
 	# number_frame_upate
-	counter_number_frame_upate = counter_number_frame_upate + 1
-	if counter_number_frame_upate > number_frame_upate:
+	counter_number_frame_update = counter_number_frame_update + 1
+	if counter_number_frame_update > number_frame_update:
 		##t1 = time.time()
-		##print "we update the database because %1.0f frame have been read in %1.3f" % (counter_number_frame_upate,
+		##print "we update the database because %1.0f frame have been read in %1.3f" % (counter_number_frame_update,
 		##																			  t1 -t0)
-		counter_number_frame_upate = 0
+		counter_number_frame_update = 0
 
 		list_image_name_db, metric_image_db = toolboox.fun_update_image_db(frame_original, 
 									 path_to_image_database+"/", 
@@ -154,9 +153,9 @@ while True:
 	if cv2.waitKey(1) & 0xFF == ord("q"):
 		break
 
-	if counter_number_frames > number_frames:
-		break
-	counter_number_frames = 1 + counter_number_frames
+	#if counter_number_frames > number_frames:
+	#	break
+	#counter_number_frames = 1 + counter_number_frames
 
 print list_image_name_db
 

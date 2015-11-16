@@ -1,0 +1,34 @@
+startPixelMirror 
+	|
+	|
+	 --> fun_initialize_image_db
+	|
+	|	
+	 --> fun_create_image_database2
+	|
+	|	
+	 while True:	 
+		|
+		|
+		 --> fun_save_image_for_db [frame]
+		|
+		|
+	 	 --> fun_construct_image_from_index_DB2
+				|
+			 	|
+				 --> fun_give_image_imdexes_from_DB2  
+		|
+		|
+		 --> fun_save_image_for_db [mosaic frame]
+		|
+		|
+		 --> if counter_number_frame_upate > number_frame_upate:
+		     	|
+		     	|
+		       	 --> fun_update_image_db
+		|
+		|
+		if cv2.waitKey(1) & 0xFF == ord("q"):
+		:	|
+			|
+			 --> break

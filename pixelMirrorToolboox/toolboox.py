@@ -47,6 +47,43 @@ def fun_initialize_image_db(cam, path_database, database_size):
 			print "frame database almost initilized"
 			break
 
+def fun_initialize_color_patches_image_db(cam, path_database, database_size):
+	'''
+	The function saves the first "database_size" frame for to initialize the 
+	image database. 
+	'''
+
+	# take one frame
+	(grabbed, frame) = cam.read()
+	frame = cv2.flip(frame,1)
+
+	# create the random values
+	data_lut = np.random.randint(0,255,(3,database_size))
+
+	for vec in np.arange(np.shape(data_lut)[1]):
+		image_temp = np.ones(np.shape(frame), dtype=float)
+		image_temp[:,:,0] = image_temp[:,:,0] * data_lut[0,vec] 
+		image_temp[:,:,1] = image_temp[:,:,1] * data_lut[1,vec] 
+		image_temp[:,:,2] = image_temp[:,:,2] * data_lut[2,vec]
+
+		cv2.imwrite(path_database+"/frame_640_480_"+str(vec).zfill(3)+".png", image_temp)
+
+		image_temp = cv2.resize(image_temp, (320, 240)) 
+		cv2.imwrite(path_database+"/frame_320_240_"+str(vec).zfill(3)+".png", image_temp)
+
+		image_temp = cv2.resize(image_temp, (160, 120))
+		cv2.imwrite(path_database+"/frame_160_120_"+str(vec).zfill(3)+".png", image_temp)
+
+		image_temp = cv2.resize(image_temp, (80, 60))
+		cv2.imwrite(path_database+"/frame_080_060_"+str(vec).zfill(3)+".png", image_temp)
+
+		image_temp = cv2.resize(image_temp, (40, 30))
+		cv2.imwrite(path_database+"/frame_040_030_"+str(vec).zfill(3)+".png", image_temp)
+
+		image_temp = cv2.resize(image_temp, (20, 15))
+		cv2.imwrite(path_database+"/frame_020_015_"+str(vec).zfill(3)+".png", image_temp)
+
+
 def fun_create_image_database(path_database, number_rows):
 	'''The function reads the images save the db folder and compute the metric for each pathToImages
 	The db is return as a list [imagePathAndName avR avG avB]
@@ -129,6 +166,52 @@ def fun_create_image_database2(path_database, number_rows, database_size):
 
 	return list_image_name_db, metric_image_db
 
+def fun_create_image_database3(path_database, number_rows, database_size):
+	'''The function does the same things as the one aboveen version 2, but in an even smarter way.
+	Instead of returning one list with everything we are returning:
+	- list of image names that are constituing the db
+	- numpy array of size 3 x nb_images where each row is the average value R, G and B of 
+	each image.
+	In:
+		- path_database (str): the path to where the images are saved 
+		- number_rows (int): information about the final grid image size
+		- database_size (int): the number of images for the "image-LUT"
+
+	Out:
+		- list_image_name_db (list of str): list of the image name that constitute the image-LUT
+		- metric_image_db (array int): array of list_image_name_db size storing the average color
+		value of each image
+	'''
+    
+	list_image_name_db = []
+	metric_image_db = np.zeros((3,database_size))
+	
+	if number_rows == 2:
+		image_search_pattern = "320_240"
+	elif number_rows == 4:
+		image_search_pattern = "160_120"
+	elif number_rows == 8:
+		image_search_pattern = "080_060"
+	elif number_rows == 16:
+		image_search_pattern = "040_030"
+	elif number_rows == 32:
+		image_search_pattern = "020_015"
+	else:
+		print "Houston...."
+
+	i = 0
+	for imagePath in glob.glob(path_database+"/*"+image_search_pattern+"*.png"):
+		# extract our unique image ID (i.e. the filename)
+		k = imagePath[imagePath.rfind("/") + 1:]
+		#print k
+		image = cv2.imread(imagePath)
+		features = describe_mean_center(image)
+		list_image_name_db.append(k)
+		metric_image_db[:,i] = np.transpose(features)
+		i = i + 1
+
+	return list_image_name_db, metric_image_db
+
 def describe_mean(frame):
 	'''The function computes the average color per rgb channel
 	of the given frame as input.
@@ -139,6 +222,19 @@ def describe_mean(frame):
 	rgb_mean[1] = frame[:,:,1].mean()
 	rgb_mean[2] = frame[:,:,2].mean()
 	
+	return rgb_mean.flatten()
+
+def describe_mean_center(frame):
+	'''The function computes the average color per rgb channel
+	of the given frame as input BUT only for the center of the image.
+	The area is approximatively 25 %  the image surface. 
+	'''
+	rgb_mean = np.zeros(3)
+	ss = np.shape(frame)
+
+	rgb_mean[0] = frame[int(ss[0]/8):int(3 * ss[0]/8),int(ss[1]/8):int(3 * ss[1]/8),0].mean()
+	rgb_mean[1] = frame[int(ss[0]/8):int(3 * ss[0]/8),int(ss[1]/8):int(3 * ss[1]/8),1].mean()
+	rgb_mean[2] = frame[int(ss[0]/8):int(3 * ss[0]/8),int(ss[1]/8):int(3 * ss[1]/8),2].mean()
 	return rgb_mean.flatten()
 
 def fun_save_image_for_db(frame, path_database, frame_name):
@@ -360,7 +456,7 @@ def fun_update_image_db(frame_video, path_to_image, list_db, metric_db, number_r
 		image_search_pattern = "040_030"
 	elif number_rows == 32:
 		new_frame_resized_for_db = cv2.resize(new_frame_for_db, (20, 15))
-		image_search_pattern = "020_015"
+		image_search_pattern = "020_015"	
 	else:
 		print "Houston...."
 	# and we save this image as the last one of
@@ -373,3 +469,4 @@ def fun_update_image_db(frame_video, path_to_image, list_db, metric_db, number_r
 	cv2.imwrite(path_to_image+list_db[-1],new_frame_resized_for_db)
 
 	return list_db, new_metric_db
+

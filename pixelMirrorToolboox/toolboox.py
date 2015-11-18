@@ -23,21 +23,87 @@ def fun_initialize_image_db(cam, path_database, database_size):
 		(grabbed, frame) = cam.read()
 		frame = cv2.flip(frame,1)
 
+		frame_shuffle = np.zeros(np.shape(frame))
+		##	
+		##if np.random.randint(2) == 0:
+		##	frame_shuffle = frame
+		##else:
+		##	frame_shuffle = frame[:,:,np.random.permutation(3)]
+		frame_shuffle = frame
+
 		# resize frame before saving
-		frame_db = cv2.resize(frame, (320, 240)) # --> 2 x 2 cells
+		cv2.imwrite(path_database+"/frame_640_480_"+str(counter).zfill(3)+".png", frame_shuffle)
+
+		# resize frame before saving
+		frame_db = cv2.resize(frame_shuffle, (320, 240)) # --> 2 x 2 cells
 		cv2.imwrite(path_database+"/frame_320_240_"+str(counter).zfill(3)+".png", frame_db)
 
-		frame_db = cv2.resize(frame, (160, 120)) # --> 4 x 4 cells
+		frame_db = cv2.resize(frame_shuffle, (160, 120)) # --> 4 x 4 cells
 		cv2.imwrite(path_database+"/frame_160_120_"+str(counter).zfill(3)+".png", frame_db)
 
-		frame_db = cv2.resize(frame, (80, 60)) # --> 8 x 8 cells
+		frame_db = cv2.resize(frame_shuffle, (80, 60)) # --> 8 x 8 cells
 		cv2.imwrite(path_database+"/frame_080_060_"+str(counter).zfill(3)+".png", frame_db)
 
-		frame_db = cv2.resize(frame, (40, 30)) # --> 8 x 8 cells
+		frame_db = cv2.resize(frame_shuffle, (40, 30)) # --> 8 x 8 cells
 		cv2.imwrite(path_database+"/frame_040_030_"+str(counter).zfill(3)+".png", frame_db)
 
-		frame_db = cv2.resize(frame, (20, 15)) # --> 8 x 8 cells
+		frame_db = cv2.resize(frame_shuffle, (20, 15)) # --> 8 x 8 cells
 		cv2.imwrite(path_database+"/frame_020_015_"+str(counter).zfill(3)+".png", frame_db)
+
+		# display frame
+		cv2.imshow("Mirror", frame)
+		counter = counter +1 
+		
+		if counter >= database_size:
+			print "frame database almost initilized"
+			break
+
+
+def fun_initialize_image_db2(cam, path_database, database_size):
+	'''
+	The function saves the first "database_size" frame for to initialize the 
+	image database. 
+	'''
+	counter =  0
+
+
+	ptCenter = np.array([320, 240])
+	while True: 
+
+		# grab image
+		(grabbed, frame) = cam.read()
+		frame = cv2.flip(frame,1)
+		ss = np.shape(frame)
+		# resize frame before saving
+		#frame_db = cv2.resize(frame, (320, 240)) # --> 2 x 2 cells
+		frame_db = frame[ptCenter[1] - ss[0]/2: ptCenter[1] + 3 * ss[0]/2,   
+					     ptCenter[0] - ss[1]/2: ptCenter[0] + 3 * ss[1]/2,:]
+		cv2.imwrite(path_database+"/frame_320_240_"+str(counter).zfill(3)+".png", frame_db)
+		del frame_db
+
+		#frame_db = cv2.resize(frame, (160, 120)) # --> 4 x 4 cells
+		frame_db = frame[ptCenter[1] - ss[0]/8: ptCenter[1] + ss[0]/8,
+						  ptCenter[0] - ss[1]/8: ptCenter[0] + ss[1]/8,:]
+		cv2.imwrite(path_database+"/frame_160_120_"+str(counter).zfill(3)+".png", frame_db)
+		del frame_db
+
+		#frame_db = cv2.resize(frame, (80, 60)) # --> 8 x 8 cells
+		frame_db = frame[ptCenter[1] - ss[0]/16: ptCenter[1] + ss[0]/16,
+						  ptCenter[0] - ss[1]/16: ptCenter[0] + ss[1]/16,:]
+		cv2.imwrite(path_database+"/frame_080_060_"+str(counter).zfill(3)+".png", frame_db)
+		del frame_db
+
+		#frame_db = cv2.resize(frame, (40, 30)) # --> 16 x 16 cells
+		frame_db = frame[ptCenter[1] - ss[0]/32: ptCenter[1] + ss[0]/32,
+						  ptCenter[0] - ss[1]/32: ptCenter[0] + ss[1]/32,:]
+		cv2.imwrite(path_database+"/frame_040_030_"+str(counter).zfill(3)+".png", frame_db)
+		del frame_db
+
+		frame_db = cv2.resize(frame, (20, 15)) # --> 32 x 32 cells
+		frame_db = frame[ptCenter[1] - ss[0]/64: ptCenter[1] + ss[0]/64,
+						 ptCenter[0] - ss[1]/64: ptCenter[0] + ss[1]/64,:]
+		cv2.imwrite(path_database+"/frame_020_015_"+str(counter).zfill(3)+".png", frame_db)
+		del frame_db
 
 		# display frame
 		cv2.imshow("Mirror", frame)
@@ -82,7 +148,6 @@ def fun_initialize_color_patches_image_db(cam, path_database, database_size):
 
 		image_temp = cv2.resize(image_temp, (20, 15))
 		cv2.imwrite(path_database+"/frame_020_015_"+str(vec).zfill(3)+".png", image_temp)
-
 
 def fun_create_image_database(path_database, number_rows):
 	'''The function reads the images save the db folder and compute the metric for each pathToImages
@@ -154,13 +219,20 @@ def fun_create_image_database2(path_database, number_rows, database_size):
 		print "Houston...."
 
 	i = 0
-	for imagePath in glob.glob(path_database+"/*"+image_search_pattern+"*.png"):
+	# I load the image in original size but will take on the center area for its value
+	for imagePath in glob.glob(path_database+"/*"+"640_480"+"*.png"):
 		# extract our unique image ID (i.e. the filename)
-		k = imagePath[imagePath.rfind("/") + 1:]
-		#print k
+		k_original = imagePath[imagePath.rfind("/") + 1:]
+		k_tile = k_original[0:6]+image_search_pattern+k_original[-8:-4]+".png"
 		image = cv2.imread(imagePath)
-		features = describe_mean(image)
-		list_image_name_db.append(k)
+		shape_image = np.shape(image)
+		ptCenter = (shape_image[1]/2,shape_image[0]/2)
+
+		image_roi = image[ptCenter[1] - (int(image_search_pattern[0:3]) / 2): ptCenter[1] + (int(image_search_pattern[0:3]) / 2),
+						  ptCenter[0] - (int(image_search_pattern[4:]) / 2): ptCenter[0] + (int(image_search_pattern[4:]) / 2),:]
+		#print np.shape(image_roi)
+		features = describe_mean(image_roi)
+		list_image_name_db.append(k_tile)
 		metric_image_db[:,i] = np.transpose(features)
 		i = i + 1
 
@@ -205,13 +277,17 @@ def fun_create_image_database3(path_database, number_rows, database_size):
 		k = imagePath[imagePath.rfind("/") + 1:]
 		#print k
 		image = cv2.imread(imagePath)
-		features = describe_mean_center(image)
+		features = describe_mean(image)
 		list_image_name_db.append(k)
 		metric_image_db[:,i] = np.transpose(features)
 		i = i + 1
 
 	return list_image_name_db, metric_image_db
 
+
+
+
+	return list_image_name_db, metric_image_db
 def describe_mean(frame):
 	'''The function computes the average color per rgb channel
 	of the given frame as input.
@@ -231,10 +307,14 @@ def describe_mean_center(frame):
 	'''
 	rgb_mean = np.zeros(3)
 	ss = np.shape(frame)
-
+	print ss
 	rgb_mean[0] = frame[int(ss[0]/8):int(3 * ss[0]/8),int(ss[1]/8):int(3 * ss[1]/8),0].mean()
 	rgb_mean[1] = frame[int(ss[0]/8):int(3 * ss[0]/8),int(ss[1]/8):int(3 * ss[1]/8),1].mean()
 	rgb_mean[2] = frame[int(ss[0]/8):int(3 * ss[0]/8),int(ss[1]/8):int(3 * ss[1]/8),2].mean()
+	#rgb_mean[0] = frame[320 - (160 / 2): 320 + (160 / 2), 240 - (120 / 2): 240 + (120 / 2),0].mean()
+	#rgb_mean[1] = frame[320 - (160 / 2): 320 + (160 / 2), 240 - (120 / 2): 240 + (120 / 2),1].mean()
+	#rgb_mean[2] = frame[320 - (160 / 2): 320 + (160 / 2), 240 - (120 / 2): 240 + (120 / 2),2].mean()
+	print rgb_mean
 	return rgb_mean.flatten()
 
 def fun_save_image_for_db(frame, path_database, frame_name):
@@ -292,6 +372,67 @@ def fun_construct_image_from_index_DB2(frame_video, path_to_image, list_db, numb
 		image_search_pattern = "40_30"
 	elif number_rows == 32:
 		image_search_pattern = "20_15"
+	else:
+		print "Houston...."
+
+	# scale image	
+	scaled_frame_video = cv2.resize(frame_video, (number_rows, number_rows)) 
+
+	# get the image indexes for each cell
+	index_image = fun_give_image_indexes_from_DB2(scaled_frame_video, number_rows, metric_db)
+
+	# construc the mosaic image
+	mirror_mosaic_frame = frame_video
+	vec_v = np.hstack([np.arange(0,np.shape(frame_video)[0], np.shape(frame_video)[0] / number_rows), 
+															 np.shape(frame_video)[0]])
+	vec_h = np.hstack([np.arange(0,np.shape(frame_video)[1], np.shape(frame_video)[1] / number_rows), 
+															 np.shape(frame_video)[1]])
+
+	vec_ind = np.arange(0,number_rows * number_rows)
+	c = 0 
+	for i in np.arange(len(vec_v)-1):
+		for j in np.arange(len(vec_h)-1):
+			mirror_mosaic_frame[vec_v[i]:vec_v[i+1], vec_h[j]:vec_h[j+1]] = cv2.imread(path_to_image+'/'+list_db[index_image[vec_ind[c]]])
+			c = c + 1
+
+	return mirror_mosaic_frame
+
+def fun_construct_image_from_index_DB3(frame_video, path_to_image, list_db, number_rows, metric_db):
+	'''This function takes a frame as input and return the mosaic version of it as output.
+
+	But instead of scaling down it take as reference the center of the frame according to the tile size.
+
+	In:
+		- frame_video (array image): an image taken by the webcam or loaded from video file
+		- path_to_image (str): the path to where the images of image-LUT are store
+		- list_db (list str): list of str for each image name constituing the image-LUT
+		- number_rows (int): information about the grid size for the mosaic number_rows x number_rows
+		- metric_db (int array): array that store the metric for each image fo the image-LUT
+
+	Out:
+		- mirror_mosaic_frame (array image): an image of the same size as frame_video but made of 
+		tiny images from list_db
+	'''
+	
+	shape_image = np.shape(frame_video)
+	ptCenter = (shape_image[1]/2,shape_image[0]/2)
+
+	if number_rows == 2:
+		image_search_pattern = "320_240"
+		ss = np.array([320, 240])
+
+	elif number_rows == 4:
+		image_search_pattern = "160_120"
+		ss = np.array([160, 120])
+	elif number_rows == 8:
+		image_search_pattern = "80_60"
+		ss = np.array([80, 60])
+	elif number_rows == 16:
+		image_search_pattern = "40_30"
+		ss = np.array([40, 30])
+	elif number_rows == 32:
+		image_search_pattern = "20_15"
+		ss = np.array([20, 15])
 	else:
 		print "Houston...."
 
@@ -442,6 +583,7 @@ def fun_update_image_db(frame_video, path_to_image, list_db, metric_db, number_r
  	
 	# replace image in the db
 	new_frame_for_db = cv2.imread(path_to_image+"new_frame.png")	
+
 	if number_rows == 2:
 		new_frame_resized_for_db = cv2.resize(new_frame_for_db, (320, 240))
 		image_search_pattern = "320_240"

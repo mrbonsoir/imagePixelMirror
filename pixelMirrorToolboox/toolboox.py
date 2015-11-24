@@ -149,6 +149,44 @@ def fun_initialize_color_patches_image_db(cam, path_database, database_size):
 		image_temp = cv2.resize(image_temp, (20, 15))
 		cv2.imwrite(path_database+"/frame_020_015_"+str(vec).zfill(3)+".png", image_temp)
 
+def fun_initialize_gray_patches_image_db(cam, path_database, database_size):
+	'''
+	The function saves the first "database_size" frames for to initialize the 
+	image database. 
+	Here we initialize the image for the db as grayscales patches.
+	'''
+
+	# take one frame
+	(grabbed, frame) = cam.read()
+	frame = cv2.flip(frame,1)
+
+	# create the random values
+	data_lut = np.round(np.linspace(0,255,32))
+	
+	for vec in np.arange(len(data_lut)):
+		image_temp = np.ones(np.shape(frame), dtype=float)
+		image_temp[:,:,0] = image_temp[:,:,0] * data_lut[vec] 
+		image_temp[:,:,1] = image_temp[:,:,1] * data_lut[vec] 
+		image_temp[:,:,2] = image_temp[:,:,2] * data_lut[vec]
+
+		cv2.imwrite(path_database+"/frame_640_480_"+str(vec).zfill(3)+".png", image_temp)
+
+		image_temp = cv2.resize(image_temp, (320, 240)) 
+		cv2.imwrite(path_database+"/frame_320_240_"+str(vec).zfill(3)+".png", image_temp)
+
+		image_temp = cv2.resize(image_temp, (160, 120))
+		cv2.imwrite(path_database+"/frame_160_120_"+str(vec).zfill(3)+".png", image_temp)
+
+		image_temp = cv2.resize(image_temp, (80, 60))
+		cv2.imwrite(path_database+"/frame_080_060_"+str(vec).zfill(3)+".png", image_temp)
+
+		image_temp = cv2.resize(image_temp, (40, 30))
+		cv2.imwrite(path_database+"/frame_040_030_"+str(vec).zfill(3)+".png", image_temp)
+
+		image_temp = cv2.resize(image_temp, (20, 15))
+		cv2.imwrite(path_database+"/frame_020_015_"+str(vec).zfill(3)+".png", image_temp)
+
+
 def fun_create_image_database(path_database, number_rows):
 	'''The function reads the images save the db folder and compute the metric for each pathToImages
 	The db is return as a list [imagePathAndName avR avG avB]

@@ -21,6 +21,8 @@ print "We process the input arguments."
 ap = argparse.ArgumentParser()
 ap.add_argument("-dbs", "--database_size", type = int,
 	help = "number of images in the database")
+ap.add_argument("-idbm", "--init_database_method", required = True, 
+	help = "cam(default) or rand to initialize the db with colored patched")
 ap.add_argument("-nr", "--number_rows", type = int, required = True,
 	help = "number of cell/super-pixel for the final mosaic, eg 4 x 4 if nr = 4")
 ap.add_argument("-dbp", "--database_path", required = True, 
@@ -30,7 +32,9 @@ ap.add_argument("-nf","--number_frames", type = int,
 ap.add_argument("-nfu","--number_frames_for_update", type = int,
 	help = "the program stops after 1000 frames or the specidied amount given")
 args = vars(ap.parse_args())
+print "You gave me love, thank you."
 print args
+
 
 # Let's process the parameters
 if not args.get("database_size", False):
@@ -81,21 +85,28 @@ camera = cv2.VideoCapture(0)
 (grabbed, frame) = camera.read()
 shape_image 	 = np.shape(frame)
 
-
-# Now we will save the first series of images grabbed by the webcam. 
-# They will be served as data for the image database.
-camera = cv2.VideoCapture(0)
-
 print 'camerea FPS here %2.4f.' % camera.get(cv2.CAP_PROP_FPS)
 print camera.get(cv2.CAP_PROP_FPS)
 
 # Here we record the first images that will served as db
-toolboox.fun_initialize_image_db(camera, path_to_image_database, database_size)
+if args["init_database_method"] == "cam":
+	# we initialize with the first frames directly
+	print "You choose the cam stream as initialization."
+	toolboox.fun_initialize_image_db(camera, path_to_image_database, database_size)
+elif args["init_database_method"] == "gray":
+	# we initialize by creating gray patches covering the brightness range from 0 to 255
+	print "You choose the gray patches as initialization."
+	toolboox.fun_initialize_gray_patches_image_db(camera, path_to_image_database, database_size)
+elif args["init_database_method"] == "rand":
+	# we initialize by creating random color patches
+	print "You choose the colored patches as initialization."
+	toolboox.fun_initialize_color_patches_image_db(camera, path_to_image_database, database_size)
+else:
+	print "Houston..."
+	toolboox.fun_initialize_image_db(camera, path_to_image_database, database_size)
 
 # Here we are saving the data for the database
-list_image_name_db, metric_image_db = toolboox.fun_create_image_database2(path_to_image_database, 
-																		number_rows, 
-																		database_size)
+list_image_name_db, metric_image_db = toolboox.fun_create_image_database2(path_to_image_database, number_rows, database_size)
 
 #print list_image_name_db
 #print metric_image_db
@@ -157,8 +168,8 @@ while True:
 	#	break
 	#counter_number_frames = 1 + counter_number_frames
 
-print list_image_name_db
-
+print list_image_name_db[-10:]
+del list_image_name_db
 # cleanup the camera and close any open windows
 camera.release()
 cv2.destroyAllWindows()

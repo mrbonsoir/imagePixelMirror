@@ -58,7 +58,6 @@ def fun_initialize_image_db(cam, path_database, database_size):
 			print "frame database almost initilized"
 			break
 
-
 def fun_initialize_image_db2(cam, path_database, database_size):
 	'''
 	The function saves the first "database_size" frame for to initialize the 
@@ -185,7 +184,6 @@ def fun_initialize_gray_patches_image_db(cam, path_database, database_size):
 
 		image_temp = cv2.resize(image_temp, (20, 15))
 		cv2.imwrite(path_database+"/frame_020_015_"+str(vec).zfill(3)+".png", image_temp)
-
 
 def fun_create_image_database(path_database, number_rows):
 	'''The function reads the images save the db folder and compute the metric for each pathToImages
@@ -322,10 +320,6 @@ def fun_create_image_database3(path_database, number_rows, database_size):
 
 	return list_image_name_db, metric_image_db
 
-
-
-
-	return list_image_name_db, metric_image_db
 def describe_mean(frame):
 	'''The function computes the average color per rgb channel
 	of the given frame as input.
@@ -649,4 +643,35 @@ def fun_update_image_db(frame_video, path_to_image, list_db, metric_db, number_r
 	cv2.imwrite(path_to_image+list_db[-1],new_frame_resized_for_db)
 
 	return list_db, new_metric_db
+
+#-----------------------------------------------------
+#
+#   somw function for displaying info on the frame
+#
+#-----------------------------------------------------
+
+def fun_get_colored_rectangle(frame, rectangle_parameters):
+	'''The function computes the average color information in the define rectangle area
+	and return an kinf of mask image where the rectangle area has the average color value, 
+	the rest is black
+	Input:
+		- frame (numpy array) : a non mofied frame
+		- rectangle_parameters	(array): [p1_x p1_y p2_x p2_y]
+	Ouput:
+		- mask_frame (numpy array): same size as frame but with different content
+	'''
+
+	mask_frame = np.zeros(np.shape(frame))
+
+	# get the average color value in the area of the rectangle
+	rectangle_area = frame[p1_x:p2_x, p1_y:p2_y, :]
+
+	mean_rectangle = describe_mean(rectangle_area)
+	
+	# add average value in the mask_frame
+	mask_frame[p1_x:p2_x, p1_y:p2_y, 0] = mean_rectangle[0]
+	mask_frame[p1_x:p2_x, p1_y:p2_y, 1] = mean_rectangle[1]
+	mask_frame[p1_x:p2_x, p1_y:p2_y, 2] = mean_rectangle[2]
+
+	return mask_frame
 

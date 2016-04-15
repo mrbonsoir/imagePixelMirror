@@ -21,8 +21,8 @@ print "We process the input arguments."
 ap = argparse.ArgumentParser()
 ap.add_argument("-dbs", "--database_size", type = int,
 	help = "number of images in the database")
-ap.add_argument("-idbm", "--init_database_method", required = True, 
-	help = "cam(default) or rand to initialize the db with colored patched")
+ap.add_argument("-idbm", "--init_database_method",# required = True, 
+	help = "cam(default) or  gray or rand to initialize the db with colored patched")
 ap.add_argument("-nr", "--number_rows", type = int, required = True,
 	help = "number of cell/super-pixel for the final mosaic, eg 4 x 4 if nr = 4")
 ap.add_argument("-dbp", "--database_path", required = True, 
